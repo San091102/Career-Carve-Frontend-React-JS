@@ -1,0 +1,133 @@
+import React, { useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import dragIcon from './three-line-menu-icon.png'; 
+import editIcon from './pencil icon.png'; 
+import toggleIcon from './toggle-button.png'; 
+import infoIcon from './i-circle-with-line.jpg'; 
+
+const sectionsMasterList = [
+  { id: '1', name: 'Profile Summary', enabled: true, description: 'Provide general information about you.' },
+  { id: '2', name: 'Academic and Cocurricular Achievements', enabled: true, description: 'State your academic and cocurricular achievements.' },
+  { id: '3', name: 'Summer Internship Experience', enabled: true, description: 'Tell us about your Summer Internship experience.' },
+  { id: '4', name: 'Work Experience', enabled: true, description: 'Tell us about your work experience.' },
+  { id: '5', name: 'Projects', enabled: false, description: 'Tell us about the projects you completed alone or you worked on along with other team members of you.' },
+  { id: '6', name: 'Certifications', enabled: false, description: 'Tell us about the certifications you have.' },
+  { id: '7', name: 'Leadership Positions', enabled: true, description: 'Tell us if you has any experience in any leadership position anywhere.' },
+  { id: '8', name: 'Extracurricular', enabled: true, description: 'State your extracuricular activities .' },
+  { id: '9', name: 'Education', enabled: true, description: 'Tell us about your educational background that is, about your school, your marks in 10th and 12th grades, highest degree of education you have achieved or you are currently pursuing.' }
+  
+];
+
+
+const ResumeBuilder = () => {
+  const [sections, setSections] = useState(sectionsMasterList);
+  const [isModified, setIsModified] = useState(false);
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const updatedSections = Array.from(sections);
+    const [movedSection] = updatedSections.splice(result.source.index, 1);
+    updatedSections.splice(result.destination.index, 0, movedSection);
+
+    setSections(updatedSections);
+    setIsModified(true);
+  };
+
+  const handleToggleSection = (sectionId) => {
+    const updatedSections = sections.map((section) =>
+      section.id === sectionId ? { ...section, enabled: !section.enabled } : section
+    );
+
+    setSections(updatedSections);
+    setIsModified(true);
+  };
+
+  const handleEditSectionName = (sectionId, newName) => {
+    const updatedSections = sections.map((section) =>
+      section.id === sectionId ? { ...section, name: newName } : section
+    );
+
+    setSections(updatedSections);
+    setIsModified(true);
+  };
+
+  const renderSections = () => {
+    return sections.map((section, index) => (
+      <Draggable key={section.id} draggableId={section.id} index={index}>
+        {(provided) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            style={{
+              ...provided.draggableProps.style,
+              marginBottom: '8px',
+              padding: '8px',
+              background: '#eef2f5',
+              borderRadius: '4px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center'}}>
+              <img src={dragIcon} alt="Drag" style={{ width: '16px', height: '16px', marginRight: '8px' }} />
+              <img src={infoIcon} alt="Info" style={{ width: '16px', height: '16px', marginRight: '8px' }} />
+              <input
+                type="text"
+                value={section.name}
+                onChange={(e) => handleEditSectionName(section.id, e.target.value)}
+                style={{ marginRight: '8px' }}
+              />
+              </div>
+              <div style={{ marginLeft: 'auto' }}>
+              <img src={editIcon} alt="Edit" style={{ width: '16px', height: '16px', marginRight: '8px' }} />
+              <button onClick={() => handleToggleSection(section.id)}>
+                <img
+                  src={toggleIcon}
+                  alt="Toggle"
+                  style={{ width: '16px', height: '16px', marginRight: '8px' }}
+                />
+              </button>
+            </div>
+          </div>
+        )}
+      </Draggable>
+    ));
+  };
+
+  return (
+    <div>
+      <h1 style={{ color: 'black', textAlign: 'center', fontSize: '32px', marginTop: '16px', fontFamily: 'Arial' }}>
+        Select your sections
+      </h1>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="sections">
+          {(provided) => (
+            <div {...provided.droppableProps} ref={provided.innerRef}>
+              {renderSections()}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+      <button
+        style={{
+          backgroundColor: 'purple',
+          color: 'white',
+          margin: '0 auto',
+          display: 'block',
+          padding: '12px 112px',
+          fontSize: '14px',
+          borderRadius: '9px',
+          marginTop: '16px',
+        }}
+        disabled={!isModified}
+      >
+        Save and Next
+      </button>
+    </div>
+  );
+};
+
+export default ResumeBuilder;
